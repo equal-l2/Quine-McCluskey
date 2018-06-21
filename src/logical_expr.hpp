@@ -9,6 +9,7 @@
 #include <iterator>
 #include <algorithm>
 #include <stdexcept>
+#include <optional>
 #include <cmath>
 #include <boost/regex.hpp>
 #include <boost/format.hpp>
@@ -17,7 +18,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/io/ios_state.hpp>
-#include <boost/optional.hpp>
 //#include <boost/logic/tribool.hpp>
 
 //
@@ -29,7 +29,7 @@ namespace logical_expr {
 using namespace std;
 
 // Don't care
-/*thread_local*/static const boost::optional<bool> dont_care = boost::none;
+/*thread_local*/static const std::optional<bool> dont_care = std::nullopt;
 // static const boost::logic::tribool dont_care = indeterminated; better than optional<bool>
 
 // expr_mode is not used now. 
@@ -108,7 +108,7 @@ public:
     result_type parse() {
         auto untokenized = scanner();
         auto token = tokenizer(untokenized);
-        boost::optional<char> undecl = use_undeclared_vars(token.second, token.first);
+        std::optional<char> undecl = use_undeclared_vars(token.second, token.first);
         if( undecl )
             throw std::runtime_error(
                 (boost::format("expr: Using undeclared variable, %c") % *undecl).str()
@@ -158,12 +158,12 @@ public:
         return true;
     }
 
-    static boost::optional<char> use_undeclared_vars(const vector<string> &terms, const string &vars) {
+    static std::optional<char> use_undeclared_vars(const vector<string> &terms, const string &vars) {
         for( auto term : terms )
           for( auto used_var : term )
             if( used_var != inverter && vars.find(used_var, 0) == string::npos )
               return (used_var);
-        return boost::none;
+        return std::nullopt;
     }
 
 private:
@@ -209,7 +209,7 @@ typedef term_property_pod<unsigned int, 0> term_number;
 template<typename Property_ = term_dummy>
 class logical_term {
 public:
-    typedef boost::optional<bool> value_type;    
+    typedef std::optional<bool> value_type;
     typedef boost::dynamic_bitset<> arg_type;
     typedef logical_term<Property_> this_type;
     typedef std::size_t size_t;
